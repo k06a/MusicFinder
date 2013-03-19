@@ -19,6 +19,8 @@
 		257A1DF916F8AE9F004BCD06 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 257A1DF716F8AE9F004BCD06 /* MainStoryboard.storyboard */; };
 		257A1DFC16F8AE9F004BCD06 /* ABArtistTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */; };
 		259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */; };
+		259F474716F8DF2400BE8A73 /* NSEnumerator+Linq.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474416F8DF2400BE8A73 /* NSEnumerator+Linq.m */; };
+		259F474816F8DF2400BE8A73 /* NSKeyValuePair.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,10 @@
 		257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ABArtistTableViewController.m; sourceTree = "<group>"; };
 		259F473F16F8D01600BE8A73 /* ABAlbumTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ABAlbumTableViewController.h; sourceTree = "<group>"; };
 		259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ABAlbumTableViewController.m; sourceTree = "<group>"; };
+		259F474316F8DF2400BE8A73 /* NSEnumerator+Linq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSEnumerator+Linq.h"; path = "Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSEnumerator+Linq.h"; sourceTree = "<group>"; };
+		259F474416F8DF2400BE8A73 /* NSEnumerator+Linq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSEnumerator+Linq.m"; path = "Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSEnumerator+Linq.m"; sourceTree = "<group>"; };
+		259F474516F8DF2400BE8A73 /* NSKeyValuePair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSKeyValuePair.h; path = Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSKeyValuePair.h; sourceTree = "<group>"; };
+		259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSKeyValuePair.m; path = Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSKeyValuePair.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +65,7 @@
 		257A1DD316F8AE9E004BCD06 = {
 			isa = PBXGroup;
 			children = (
+				259F474216F8DEFE00BE8A73 /* NSEnumeratorLinq */,
 				257A1DE516F8AE9E004BCD06 /* MusicFinder */,
 				257A1DDE16F8AE9E004BCD06 /* Frameworks */,
 				257A1DDD16F8AE9E004BCD06 /* Products */,
@@ -110,6 +117,17 @@
 				257A1DF516F8AE9F004BCD06 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		259F474216F8DEFE00BE8A73 /* NSEnumeratorLinq */ = {
+			isa = PBXGroup;
+			children = (
+				259F474316F8DF2400BE8A73 /* NSEnumerator+Linq.h */,
+				259F474416F8DF2400BE8A73 /* NSEnumerator+Linq.m */,
+				259F474516F8DF2400BE8A73 /* NSKeyValuePair.h */,
+				259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */,
+			);
+			name = NSEnumeratorLinq;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,6 +201,8 @@
 				257A1DF016F8AE9F004BCD06 /* ABAppDelegate.m in Sources */,
 				257A1DFC16F8AE9F004BCD06 /* ABArtistTableViewController.m in Sources */,
 				259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */,
+				259F474716F8DF2400BE8A73 /* NSEnumerator+Linq.m in Sources */,
+				259F474816F8DF2400BE8A73 /* NSKeyValuePair.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

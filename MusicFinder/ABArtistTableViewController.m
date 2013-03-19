@@ -6,13 +6,16 @@
 //  Copyright (c) 2013 Anton Bukov. All rights reserved.
 //
 
+#import "NSEnumerator+Linq.h"
 #import "ABArtistTableViewController.h"
 #import "ABAlbumTableViewController.h"
 
 @interface ABArtistTableViewController () <UISearchBarDelegate>
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (nonatomic) NSMutableArray * artists;
 @property (nonatomic) NSMutableDictionary * artistImageDict;
-@property (nonatomic) NSMutableDictionary * futureRequests;
+@property (nonatomic) int artistsPage;
+@property (nonatomic) BOOL artistsFinished;
 @end
 
 @implementation ABArtistTableViewController
@@ -31,24 +34,6 @@
     return _artistImageDict;
 }
 
-- (NSMutableDictionary *)futureRequests
-{
-    if (_futureRequests == nil)
-        _futureRequests = [NSMutableDictionary dictionary];
-    return _futureRequests;
-}
-
-- (void)addFutureRequestsObject:(id)object forIndexPath:(NSIndexPath *)indexPath
-{
-    NSMutableArray * array = self.futureRequests[indexPath];
-    if (array == nil)
-    {
-        array = [NSMutableArray array];
-        self.futureRequests[indexPath] = array;
-    }
-    [array addObject:object];
-}
-
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([segue.identifier isEqualToString:@"segue_artist2albums"])
@@ -60,39 +45,40 @@
 
 #pragma mark - UISearchBar
 
+- (void)requestArtistsByName:(NSString *)name
+{
+    NSLog(@"Request page %d", self.artistsPage);
+    self.artistsPage += 1;
+    
+    NSString * str = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                                                           (CFStringRef)name,
+                                                                                           NULL,
+                                                                                           (CFStringRef)@"!*'();:@&=+$,/?%#[] ",
+                                                                                           kCFStringEncodingUTF8));
+    
+    NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.search&api_key=50baa20485da064d8c8c070387d79088&format=json&artist=%@&limit=%d&page=%d",str,30,self.artistsPage-1,nil];
+    
+    NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
+    NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSArray * artists = json[@"results"][@"artistmatches"][@"artist"];
+    if (artists.count < 30)
+        self.artistsFinished = YES;
+    artists = [[[artists objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.artists addObjectsFromArray:artists];
+        [self.tableView reloadData];
+    });
+}
+
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     self.artists = nil;
-    self.futureRequests = nil;
+    self.artistsPage = 1;
+    self.artistsFinished = NO;
     [self.tableView reloadData];
     
-    __block ABArtistTableViewController * this = self;
-    for (int i = 0; i < 100; i++) {
-        const int rowsByRequest = 30;
-        const int actionRow = MAX(0,i*rowsByRequest-rowsByRequest/2); // 0,50,150,250,350...
-        
-        [self addFutureRequestsObject:[^{
-            NSLog(@"Request page #%d", i);
-            NSString * str = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,
-                                                                                 (CFStringRef)searchBar.text,
-                                                                                 NULL,
-                                                                                 (CFStringRef)@"!*'();:@&=+$,/?%#[] ",
-                                                                                 kCFStringEncodingUTF8));
-            
-            NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.search&api_key=50baa20485da064d8c8c070387d79088&format=json&artist=%@&limit=%d&page=%d",str,rowsByRequest,i,nil];
-            
-            NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
-            NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-            NSArray * artists = json[@"results"][@"artistmatches"][@"artist"];
-            [this.artists addObjectsFromArray:artists];
-            [this.tableView reloadData];
-        } copy] forIndexPath:[NSIndexPath indexPathForRow:actionRow inSection:0]];
-    }
-    
-    NSIndexPath * zeroIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    void(^func)() = [self.futureRequests[zeroIndexPath] objectAtIndex:0];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), func);
-    [self.futureRequests removeObjectForKey:zeroIndexPath];
+    [self requestArtistsByName:searchBar.text];
     
     [searchBar resignFirstResponder];
 }
@@ -111,27 +97,29 @@
     if (cell == nil)
         cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleValue1) reuseIdentifier:cell_id];
     
-    NSArray * tasks = self.futureRequests[indexPath];
-    if (tasks)
+    if (!self.artistsFinished && indexPath.row + 1 == self.artists.count)
     {
-        for (void(^func)() in tasks)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), func);
-        [self.futureRequests removeObjectForKey:indexPath];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [self requestArtistsByName:self.searchBar.text];
+        });
     }
     
     NSDictionary * artist = self.artists[indexPath.row];
     cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,artist[@"name"],nil];
     cell.detailTextLabel.text = [NSString stringWithFormat:@"%@👂",artist[@"listeners"],nil];
+    cell.imageView.contentMode = UIViewContentModeScaleAspectFill;
     cell.imageView.image = nil;
+    cell.imageView.bounds = CGRectMake(0, 0, 30, 30);
     
     NSString * image_url = artist[@"image"][0][@"#text"];
     if (image_url.length == 0)
         return cell;
     
-    UIImage * image= self.artistImageDict[image_url];
+    UIImage * image = self.artistImageDict[image_url];
     if (image)
     {
         cell.imageView.image = image;
+        cell.imageView.bounds = CGRectMake(0, 0, 30, 30);
         return cell;
     }
     

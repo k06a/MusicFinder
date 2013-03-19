@@ -94,6 +94,9 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Artist" id="mpD-p2-Syy"/>
+                    <connections>
+                        <outlet property="searchBar" destination="6wP-7k-2P4" id="MAM-Sa-Hep"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ofp-UV-HU4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -118,14 +121,6 @@
             <point key="canvasLocation" x="187" y="18"/>
         </scene>
     </scenes>
-    <classes>
-        <class className="ABAlbumTableViewController" superclassName="UITableViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/ABAlbumTableViewController.h"/>
-        </class>
-        <class className="ABArtistTableViewController" superclassName="UITableViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/ABArtistTableViewController.h"/>
-        </class>
-    </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>
         <simulatedOrientationMetrics key="orientation"/>
