@@ -7,6 +7,7 @@
 //
 
 #import "NSEnumerator+Linq.h"
+#import "ABTrackTableViewController.h"
 #import "ABAlbumTableViewController.h"
 
 @interface ABAlbumTableViewController ()
@@ -32,6 +33,15 @@
     return _albumImageDict;
 }
 
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"segue_album2tracks"])
+    {
+        ABTrackTableViewController * controller = segue.destinationViewController;
+        controller.album = self.albums[[self.tableView indexPathForCell:sender].row];
+    }
+}
+
 #pragma mark - UITableView
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -47,8 +57,12 @@
         cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleSubtitle) reuseIdentifier:cell_id];
     
     NSDictionary * album = self.albums[indexPath.row];
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%@)",album[@"name"],album[@"year"],nil];
-    cell.detailTextLabel.text = album[@"mbid"];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@",album[@"name"],nil];
+    
+    NSArray * tracks = album[@"tracks"][@"track"];
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%d songs",tracks.count,nil];
+    if (![album[@"year"] isEqualToString:@"0000"])
+        cell.detailTextLabel.text = [cell.detailTextLabel.text stringByAppendingFormat:@" (%@)",album[@"year"],nil];
     
     NSString * image_url = album[@"image"][0][@"#text"];
     if (image_url.length == 0)
@@ -82,29 +96,36 @@
 {
     [super viewDidLoad];
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    self.title = self.artist[@"name"];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&api_key=50baa20485da064d8c8c070387d79088&format=json&mbid=%@",self.artist[@"mbid"],nil];
         NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
         NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         NSArray * albums = json[@"topalbums"][@"album"];
+        if (!albums)
+            return;
+        if (![albums isKindOfClass:[NSArray class]])
+            albums = @[albums];
         albums = [[[albums objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
         
-        albums = [[[[[albums objectEnumerator] select:^id(NSDictionary * album) {
+        albums = [[[[albums objectEnumerator] select_parallel:^id(NSDictionary * album) {
             NSString * album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&mbid=%@",album[@"mbid"],nil];
             NSData * album_data = [NSData dataWithContentsOfURL:[NSURL URLWithString:album_url]];
             NSDictionary * album_json = [NSJSONSerialization JSONObjectWithData:album_data options:0 error:nil];
             
-            NSLog(@"%@", album_json);
             return album_json[@"album"];
         }] select:^id(NSDictionary * album) {
             NSMutableDictionary * dict = [album mutableCopy];
             NSString * year = [[[album[@"releasedate"] componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" ,"]] objectEnumerator] firstOrDefault:PREDICATE(NSString * a, a.length == 4)];
-            dict[@"year"] = year ? year : @"0000";
+            dict[@"year"] = (year ? year : @"0000");
             return dict;
-        }] orderByDescending:^id(NSDictionary * album) {
-            return album[@"year"];
         }] allObjects];
         
+        albums = [albums sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            return [obj2[@"year"] compare:obj1[@"year"] options:0];
+        }];
+                  
         [self.albums addObjectsFromArray:albums];
         
         dispatch_async(dispatch_get_main_queue(), ^{

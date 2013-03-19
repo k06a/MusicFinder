@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		25542D5A16F915D0009C7BF0 /* ABTrackTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 25542D5916F915D0009C7BF0 /* ABTrackTableViewController.m */; };
+		25542D5D16F91970009C7BF0 /* ABListenTrackViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 25542D5C16F91970009C7BF0 /* ABListenTrackViewController.m */; };
 		257A1DE016F8AE9E004BCD06 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 257A1DDF16F8AE9E004BCD06 /* UIKit.framework */; };
 		257A1DE216F8AE9E004BCD06 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 257A1DE116F8AE9E004BCD06 /* Foundation.framework */; };
 		257A1DE416F8AE9E004BCD06 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 257A1DE316F8AE9E004BCD06 /* CoreGraphics.framework */; };
@@ -24,6 +26,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		25542D5816F915D0009C7BF0 /* ABTrackTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ABTrackTableViewController.h; sourceTree = "<group>"; };
+		25542D5916F915D0009C7BF0 /* ABTrackTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ABTrackTableViewController.m; sourceTree = "<group>"; };
+		25542D5B16F91970009C7BF0 /* ABListenTrackViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ABListenTrackViewController.h; sourceTree = "<group>"; };
+		25542D5C16F91970009C7BF0 /* ABListenTrackViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ABListenTrackViewController.m; sourceTree = "<group>"; };
 		257A1DDC16F8AE9E004BCD06 /* MusicFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		257A1DDF16F8AE9E004BCD06 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		257A1DE116F8AE9E004BCD06 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -100,6 +106,10 @@
 				257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */,
 				259F473F16F8D01600BE8A73 /* ABAlbumTableViewController.h */,
 				259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */,
+				25542D5816F915D0009C7BF0 /* ABTrackTableViewController.h */,
+				25542D5916F915D0009C7BF0 /* ABTrackTableViewController.m */,
+				25542D5B16F91970009C7BF0 /* ABListenTrackViewController.h */,
+				25542D5C16F91970009C7BF0 /* ABListenTrackViewController.m */,
 				257A1DE616F8AE9E004BCD06 /* Supporting Files */,
 			);
 			path = MusicFinder;
@@ -203,6 +213,8 @@
 				259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */,
 				259F474716F8DF2400BE8A73 /* NSEnumerator+Linq.m in Sources */,
 				259F474816F8DF2400BE8A73 /* NSKeyValuePair.m in Sources */,
+				25542D5A16F915D0009C7BF0 /* ABTrackTableViewController.m in Sources */,
+				25542D5D16F91970009C7BF0 /* ABListenTrackViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,10 +310,14 @@
 		257A1E0116F8AE9F004BCD06 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MusicFinder/MusicFinder-Prefix.pch";
 				INFOPLIST_FILE = "MusicFinder/MusicFinder-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
