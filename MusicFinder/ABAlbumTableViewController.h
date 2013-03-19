@@ -1,5 +1,5 @@
 //
-//  ABViewController.h
+//  ABAlbumTableViewController.h
 //  MusicFinder
 //
 //  Created by Антон Буков on 19.03.13.
@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ABViewController : UIViewController
+@interface ABAlbumTableViewController : UITableViewController
+
+@property (nonatomic) NSDictionary * artist;
 
 @end

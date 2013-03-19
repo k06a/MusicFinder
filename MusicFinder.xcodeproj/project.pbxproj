@@ -17,7 +17,8 @@
 		257A1DF416F8AE9F004BCD06 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 257A1DF316F8AE9F004BCD06 /* Default@2x.png */; };
 		257A1DF616F8AE9F004BCD06 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 257A1DF516F8AE9F004BCD06 /* Default-568h@2x.png */; };
 		257A1DF916F8AE9F004BCD06 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 257A1DF716F8AE9F004BCD06 /* MainStoryboard.storyboard */; };
-		257A1DFC16F8AE9F004BCD06 /* ABViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 257A1DFB16F8AE9F004BCD06 /* ABViewController.m */; };
+		257A1DFC16F8AE9F004BCD06 /* ABArtistTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */; };
+		259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +36,10 @@
 		257A1DF316F8AE9F004BCD06 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		257A1DF516F8AE9F004BCD06 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		257A1DF816F8AE9F004BCD06 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
-		257A1DFA16F8AE9F004BCD06 /* ABViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ABViewController.h; sourceTree = "<group>"; };
-		257A1DFB16F8AE9F004BCD06 /* ABViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ABViewController.m; sourceTree = "<group>"; };
+		257A1DFA16F8AE9F004BCD06 /* ABArtistTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ABArtistTableViewController.h; sourceTree = "<group>"; };
+		257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ABArtistTableViewController.m; sourceTree = "<group>"; };
+		259F473F16F8D01600BE8A73 /* ABAlbumTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ABAlbumTableViewController.h; sourceTree = "<group>"; };
+		259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ABAlbumTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +89,10 @@
 				257A1DEE16F8AE9F004BCD06 /* ABAppDelegate.h */,
 				257A1DEF16F8AE9F004BCD06 /* ABAppDelegate.m */,
 				257A1DF716F8AE9F004BCD06 /* MainStoryboard.storyboard */,
-				257A1DFA16F8AE9F004BCD06 /* ABViewController.h */,
-				257A1DFB16F8AE9F004BCD06 /* ABViewController.m */,
+				257A1DFA16F8AE9F004BCD06 /* ABArtistTableViewController.h */,
+				257A1DFB16F8AE9F004BCD06 /* ABArtistTableViewController.m */,
+				259F473F16F8D01600BE8A73 /* ABAlbumTableViewController.h */,
+				259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */,
 				257A1DE616F8AE9E004BCD06 /* Supporting Files */,
 			);
 			path = MusicFinder;
@@ -176,7 +181,8 @@
 			files = (
 				257A1DEC16F8AE9E004BCD06 /* main.m in Sources */,
 				257A1DF016F8AE9F004BCD06 /* ABAppDelegate.m in Sources */,
-				257A1DFC16F8AE9F004BCD06 /* ABViewController.m in Sources */,
+				257A1DFC16F8AE9F004BCD06 /* ABArtistTableViewController.m in Sources */,
+				259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,6 +305,7 @@
 				257A1E0116F8AE9F004BCD06 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
