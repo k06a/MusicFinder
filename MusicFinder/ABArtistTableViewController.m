@@ -56,6 +56,8 @@
                                                                                            (CFStringRef)@"!*'();:@&=+$,/?%#[] ",
                                                                                            kCFStringEncodingUTF8));
     
+    //NSString * url = @"http://www.musicbrainz.org/ws/2/recording?query=%22we%20will%20rock%20you%22%20AND%20arid:0383dadf-2a4e-4d10-a46a-e9e041da8eb3";
+    
     NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.search&api_key=50baa20485da064d8c8c070387d79088&format=json&artist=%@&limit=%d&page=%d",str,30,self.artistsPage-1,nil];
     
     NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];

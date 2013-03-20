@@ -23,6 +23,7 @@
 		259F474116F8D01600BE8A73 /* ABAlbumTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474016F8D01600BE8A73 /* ABAlbumTableViewController.m */; };
 		259F474716F8DF2400BE8A73 /* NSEnumerator+Linq.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474416F8DF2400BE8A73 /* NSEnumerator+Linq.m */; };
 		259F474816F8DF2400BE8A73 /* NSKeyValuePair.m in Sources */ = {isa = PBXBuildFile; fileRef = 259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */; };
+		25D17B4316F9C585002BBC95 /* XMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 25D17B4216F9C585002BBC95 /* XMLReader.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,8 @@
 		259F474416F8DF2400BE8A73 /* NSEnumerator+Linq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSEnumerator+Linq.m"; path = "Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSEnumerator+Linq.m"; sourceTree = "<group>"; };
 		259F474516F8DF2400BE8A73 /* NSKeyValuePair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSKeyValuePair.h; path = Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSKeyValuePair.h; sourceTree = "<group>"; };
 		259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSKeyValuePair.m; path = Submodules/NSEnumeratorLinq/NSEnumeratorLinq/NSKeyValuePair.m; sourceTree = "<group>"; };
+		25D17B4116F9C585002BBC95 /* XMLReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMLReader.h; path = "Submodules/XML-to-NSDictionary/XMLReader.h"; sourceTree = "<group>"; };
+		25D17B4216F9C585002BBC95 /* XMLReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMLReader.m; path = "Submodules/XML-to-NSDictionary/XMLReader.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +74,7 @@
 		257A1DD316F8AE9E004BCD06 = {
 			isa = PBXGroup;
 			children = (
+				25D17B4016F9C573002BBC95 /* XML-to-NSDictionary */,
 				259F474216F8DEFE00BE8A73 /* NSEnumeratorLinq */,
 				257A1DE516F8AE9E004BCD06 /* MusicFinder */,
 				257A1DDE16F8AE9E004BCD06 /* Frameworks */,
@@ -138,6 +142,15 @@
 				259F474616F8DF2400BE8A73 /* NSKeyValuePair.m */,
 			);
 			name = NSEnumeratorLinq;
+			sourceTree = "<group>";
+		};
+		25D17B4016F9C573002BBC95 /* XML-to-NSDictionary */ = {
+			isa = PBXGroup;
+			children = (
+				25D17B4116F9C585002BBC95 /* XMLReader.h */,
+				25D17B4216F9C585002BBC95 /* XMLReader.m */,
+			);
+			name = "XML-to-NSDictionary";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -215,6 +228,7 @@
 				259F474816F8DF2400BE8A73 /* NSKeyValuePair.m in Sources */,
 				25542D5A16F915D0009C7BF0 /* ABTrackTableViewController.m in Sources */,
 				25542D5D16F91970009C7BF0 /* ABListenTrackViewController.m in Sources */,
+				25D17B4316F9C585002BBC95 /* XMLReader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

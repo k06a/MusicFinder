@@ -49,9 +49,9 @@
     int duration = [track[@"duration"] intValue];
     cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,track[@"name"],nil];
     if (duration < 60*60)
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%2d",duration/60,duration%60,nil];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%02d",duration/60,duration%60,nil];
     else
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%2d:%2d",duration/3600,(duration%3600)/60,duration%60,nil];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%02d:%02d",duration/3600,(duration%3600)/60,duration%60,nil];
     
     return cell;
 }

@@ -1,3 +1,6 @@
 [submodule "Submodules/NSEnumeratorLinq"]
 	path = Submodules/NSEnumeratorLinq
 	url = https://k06a@github.com/k06a/NSEnumeratorLinq.git
+[submodule "Submodules/XML-to-NSDictionary"]
+	path = Submodules/XML-to-NSDictionary
+	url = https://github.com/bcaccinolo/XML-to-NSDictionary.git

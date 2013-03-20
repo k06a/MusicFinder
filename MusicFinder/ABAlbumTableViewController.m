@@ -98,40 +98,54 @@
 
     self.title = self.artist[@"name"];
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&api_key=50baa20485da064d8c8c070387d79088&format=json&mbid=%@",self.artist[@"mbid"],nil];
-        NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
-        NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        NSArray * albums = json[@"topalbums"][@"album"];
-        if (!albums)
-            return;
-        if (![albums isKindOfClass:[NSArray class]])
-            albums = @[albums];
-        albums = [[[albums objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
-        
-        albums = [[[[albums objectEnumerator] select_parallel:^id(NSDictionary * album) {
-            NSString * album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&mbid=%@",album[@"mbid"],nil];
-            NSData * album_data = [NSData dataWithContentsOfURL:[NSURL URLWithString:album_url]];
-            NSDictionary * album_json = [NSJSONSerialization JSONObjectWithData:album_data options:0 error:nil];
+    __block int totalPages = 100;
+    for (int i = 1; i < totalPages; i++)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            //NSString * artistName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)self.artist[@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
             
-            return album_json[@"album"];
-        }] select:^id(NSDictionary * album) {
-            NSMutableDictionary * dict = [album mutableCopy];
-            NSString * year = [[[album[@"releasedate"] componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" ,"]] objectEnumerator] firstOrDefault:PREDICATE(NSString * a, a.length == 4)];
-            dict[@"year"] = (year ? year : @"0000");
-            return dict;
-        }] allObjects];
-        
-        albums = [albums sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-            return [obj2[@"year"] compare:obj1[@"year"] options:0];
-        }];
-                  
-        [self.albums addObjectsFromArray:albums];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
+            NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&api_key=50baa20485da064d8c8c070387d79088&format=json&mbid=%@&page=%d",self.artist[@"mbid"],i,nil];
+            NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
+            NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+            totalPages = [json[@"topalbums"][@"@attr"][@"totalPages"] intValue];
+            if (i > totalPages)
+                return;
+            
+            NSArray * albums = json[@"topalbums"][@"album"];
+            if (!albums)
+                return;
+            if (![albums isKindOfClass:[NSArray class]])
+                albums = @[albums];
+            //albums = [[[albums objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
+            
+            albums = [[[[albums objectEnumerator] select_parallel:^id(NSDictionary * album) {
+                NSString * artistName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)album[@"artist"][@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
+                NSString * albumName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)album[@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
+                
+                NSString * album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&artist=%@&album=%@",artistName,albumName,nil];
+                /*album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&mbid=%@",album[@"mbid"],nil];*/
+                NSData * album_data = [NSData dataWithContentsOfURL:[NSURL URLWithString:album_url]];
+                NSDictionary * album_json = [NSJSONSerialization JSONObjectWithData:album_data options:0 error:nil];
+                
+                return album_json[@"album"];
+            }] select:^id(NSDictionary * album) {
+                NSMutableDictionary * dict = [album mutableCopy];
+                NSString * year = [[[album[@"releasedate"] componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" ,"]] objectEnumerator] firstOrDefault:PREDICATE(NSString * a, a.length == 4)];
+                dict[@"year"] = (year ? year : @"0000");
+                return dict;
+            }] allObjects];
+            
+            
+            self.albums = [[[self.albums arrayByAddingObjectsFromArray:albums]
+                           sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                               return [obj2[@"year"] compare:obj1[@"year"] options:0];
+                           }] mutableCopy];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableView reloadData];
+            });
         });
-    });
+    }
 }
 
 - (void)didReceiveMemoryWarning
