@@ -6,12 +6,14 @@
 //  Copyright (c) 2013 Anton Bukov. All rights reserved.
 //
 
+#import "XMLReader.h"
 #import "NSEnumerator+Linq.h"
 #import "ABTrackTableViewController.h"
 #import "ABAlbumTableViewController.h"
 
 @interface ABAlbumTableViewController ()
-@property (nonatomic) NSMutableArray * albums;
+@property (nonatomic) NSMutableDictionary * albums;
+@property (nonatomic) NSMutableArray * releases;
 @property (nonatomic) NSMutableDictionary * albumImageDict;
 @property (nonatomic) int albumPage;
 @property (nonatomic) BOOL albumFinished;
@@ -19,11 +21,25 @@
 
 @implementation ABAlbumTableViewController
 
-- (NSArray *)albums
+- (NSMutableDictionary *)albums
 {
     if (_albums == nil)
-        _albums = [NSMutableArray array];
+        _albums = [NSMutableDictionary dictionary];
     return _albums;
+}
+
+- (NSArray *)orderedAlbums
+{
+    return [[self.albums allValues] sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        return [obj2[@"year"] compare:obj1[@"year"]];
+    }];
+}
+
+- (NSMutableArray *)releases
+{
+    if (_releases == nil)
+        _releases = [NSMutableArray array];
+    return _releases;
 }
 
 - (NSMutableDictionary *)albumImageDict
@@ -37,8 +53,17 @@
 {
     if ([segue.identifier isEqualToString:@"segue_album2tracks"])
     {
+        NSInteger row = [self.tableView indexPathForCell:sender].row;
+        
+        NSDictionary * album = [self orderedAlbums][row];
+        NSDictionary * release = [[self.releases objectEnumerator] firstOrDefault:PREDICATE(id a, [a[@"release-group"][@"id"] isEqualToString:album[@"id"]])];
+        NSDictionary * medium = release[@"medium-list"][@"medium"];
+        if ([medium isKindOfClass:[NSArray class]])
+            medium = [[medium objectEnumerator] max:FUNC(id, id a, @([a[@"track-list"][@"count"] intValue]))];
+    
         ABTrackTableViewController * controller = segue.destinationViewController;
-        controller.album = self.albums[[self.tableView indexPathForCell:sender].row];
+        controller.album = release;
+        controller.tracks = medium[@"track-list"][@"track"];
     }
 }
 
@@ -56,14 +81,18 @@
     if (cell == nil)
         cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleSubtitle) reuseIdentifier:cell_id];
     
-    NSDictionary * album = self.albums[indexPath.row];
-    cell.textLabel.text = [NSString stringWithFormat:@"%@",album[@"name"],nil];
+    NSDictionary * album = [self orderedAlbums][indexPath.row];
+    NSDictionary * release = [[self.releases objectEnumerator] firstOrDefault:PREDICATE(id a, [a[@"release-group"][@"id"] isEqualToString:album[@"id"]])];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@",album[@"title"][@"text"],nil];
     
-    NSArray * tracks = album[@"tracks"][@"track"];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%d songs",tracks.count,nil];
+    id medium = release[@"medium-list"][@"medium"];
+    if ([medium isKindOfClass:[NSArray class]])
+        medium = [[medium objectEnumerator] max:FUNC(id, id a, @([a[@"track-list"][@"count"] intValue]))];
+    
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ tracks",medium[@"track-list"][@"count"],nil];
     if (![album[@"year"] isEqualToString:@"0000"])
         cell.detailTextLabel.text = [cell.detailTextLabel.text stringByAppendingFormat:@" (%@)",album[@"year"],nil];
-    
+    /*
     NSString * image_url = album[@"image"][0][@"#text"];
     if (image_url.length == 0)
         return cell;
@@ -86,6 +115,7 @@
             NSLog(@"Set image for %@", indexPath);
         });
     });
+    */
     
     return cell;
 }
@@ -96,56 +126,37 @@
 {
     [super viewDidLoad];
 
-    self.title = self.artist[@"name"];
+    self.title = self.artist[@"name"][@"text"];
     
-    __block int totalPages = 100;
-    for (int i = 1; i < totalPages; i++)
+    for (int i = 0; YES; i++)
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            //NSString * artistName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)self.artist[@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
-            
-            NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&api_key=50baa20485da064d8c8c070387d79088&format=json&mbid=%@&page=%d",self.artist[@"mbid"],i,nil];
-            NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
-            NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-            totalPages = [json[@"topalbums"][@"@attr"][@"totalPages"] intValue];
-            if (i > totalPages)
-                return;
-            
-            NSArray * albums = json[@"topalbums"][@"album"];
-            if (!albums)
-                return;
-            if (![albums isKindOfClass:[NSArray class]])
-                albums = @[albums];
-            //albums = [[[albums objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
-            
-            albums = [[[[albums objectEnumerator] select_parallel:^id(NSDictionary * album) {
-                NSString * artistName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)album[@"artist"][@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
-                NSString * albumName = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)album[@"name"],NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
-                
-                NSString * album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&artist=%@&album=%@",artistName,albumName,nil];
-                /*album_url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=50baa20485da064d8c8c070387d79088&format=json&lang=ru&mbid=%@",album[@"mbid"],nil];*/
-                NSData * album_data = [NSData dataWithContentsOfURL:[NSURL URLWithString:album_url]];
-                NSDictionary * album_json = [NSJSONSerialization JSONObjectWithData:album_data options:0 error:nil];
-                
-                return album_json[@"album"];
-            }] select:^id(NSDictionary * album) {
-                NSMutableDictionary * dict = [album mutableCopy];
-                NSString * year = [[[album[@"releasedate"] componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" ,"]] objectEnumerator] firstOrDefault:PREDICATE(NSString * a, a.length == 4)];
-                dict[@"year"] = (year ? year : @"0000");
-                return dict;
-            }] allObjects];
-            
-            
-            self.albums = [[[self.albums arrayByAddingObjectsFromArray:albums]
-                           sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-                               return [obj2[@"year"] compare:obj1[@"year"] options:0];
-                           }] mutableCopy];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.tableView reloadData];
-            });
-        });
-    }
+        NSLog(@"Request page #%d", i);
+        NSString * url = [NSString stringWithFormat:@"http://www.musicbrainz.org/ws/2/release?artist=%@&inc=release-groups+recordings&type=album&status=official&limit=100&offset=%d",self.artist[@"id"],i*100,nil];
+        
+        NSError * error;
+        NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
+        NSDictionary * json = [XMLReader dictionaryForXMLData:data error:&error];
+        
+        NSArray * releases = json[@"metadata"][@"release-list"][@"release"];
+        releases = [releases isKindOfClass:[NSArray class]] ? releases : @[releases];
+        [self.releases addObjectsFromArray:releases];
+        
+        [self.albums addEntriesFromDictionary:[[[[releases objectEnumerator]
+                                                 select:FUNC(id, id a, a[@"release-group"])]
+                                                select:^id(id album) {
+                                                    NSString * year = album[@"first-release-date"][@"text"];
+                                                    year = year ? year : @"0000";
+                                                    year = [year substringToIndex:MIN(year.length,4)];
+                                                    NSMutableDictionary * dict = [album mutableCopy];
+                                                    [dict addEntriesFromDictionary:@{@"year":year}];
+                                                    return dict;
+                                                }] toDictionary:FUNC(id, id album, album[@"id"])]];
+        
+        if (self.releases.count == [json[@"metadata"][@"release-list"][@"count"] intValue])
+            break;
+    };
+    
+    [self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning

@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Anton Bukov. All rights reserved.
 //
 
+#import "XMLReader.h"
 #import "NSEnumerator+Linq.h"
 #import "ABArtistTableViewController.h"
 #import "ABAlbumTableViewController.h"
@@ -14,8 +15,9 @@
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (nonatomic) NSMutableArray * artists;
 @property (nonatomic) NSMutableDictionary * artistImageDict;
-@property (nonatomic) int artistsPage;
+@property (nonatomic) int artistsOffset;
 @property (nonatomic) BOOL artistsFinished;
+@property (nonatomic) int dangerRow;
 @end
 
 @implementation ABArtistTableViewController
@@ -47,28 +49,25 @@
 
 - (void)requestArtistsByName:(NSString *)name
 {
-    NSLog(@"Request page %d", self.artistsPage);
-    self.artistsPage += 1;
+    NSLog(@"Request offset %d", self.artistsOffset);
     
-    NSString * str = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,
-                                                                                           (CFStringRef)name,
-                                                                                           NULL,
-                                                                                           (CFStringRef)@"!*'();:@&=+$,/?%#[] ",
-                                                                                           kCFStringEncodingUTF8));
+    NSString * str = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)name,NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[] ",kCFStringEncodingUTF8));
     
-    //NSString * url = @"http://www.musicbrainz.org/ws/2/recording?query=%22we%20will%20rock%20you%22%20AND%20arid:0383dadf-2a4e-4d10-a46a-e9e041da8eb3";
+    NSString * url = [NSString stringWithFormat:@"http://www.musicbrainz.org/ws/2/artist?limit=100&offset=%d&query=%@",self.artistsOffset,str,nil];
     
-    NSString * url = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=artist.search&api_key=50baa20485da064d8c8c070387d79088&format=json&artist=%@&limit=%d&page=%d",str,30,self.artistsPage-1,nil];
-    
+    NSError * error;
     NSData * data = [NSData dataWithContentsOfURL:[NSURL URLWithString:url]];
-    NSDictionary * json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    NSArray * artists = json[@"results"][@"artistmatches"][@"artist"];
-    if (artists.count < 30)
+    NSDictionary * json = [XMLReader dictionaryForXMLData:data error:&error];
+    
+    NSArray * artists = json[@"metadata"][@"artist-list"][@"artist"];
+    artists = [artists isKindOfClass:[NSArray class]] ? artists : @[artists];
+    self.artistsOffset += artists.count;
+    if (artists.count < 100)
         self.artistsFinished = YES;
-    artists = [[[artists objectEnumerator] where:PREDICATE(id a, [a[@"mbid"] length])] allObjects];
-
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.artists addObjectsFromArray:artists];
+        self.dangerRow = MAX(0,self.artists.count-25);
         [self.tableView reloadData];
     });
 }
@@ -76,7 +75,7 @@
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     self.artists = nil;
-    self.artistsPage = 1;
+    self.artistsOffset = 0;
     self.artistsFinished = NO;
     [self.tableView reloadData];
     
@@ -99,7 +98,7 @@
     if (cell == nil)
         cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleValue1) reuseIdentifier:cell_id];
     
-    if (!self.artistsFinished && indexPath.row + 1 == self.artists.count)
+    if (!self.artistsFinished && indexPath.row == self.dangerRow)
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [self requestArtistsByName:self.searchBar.text];
@@ -107,11 +106,21 @@
     }
     
     NSDictionary * artist = self.artists[indexPath.row];
-    cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,artist[@"name"],nil];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%@👂",artist[@"listeners"],nil];
-    cell.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    NSString * name = artist[@"name"][@"text"];
+    NSString * disambiguation = artist[@"disambiguation"][@"text"];
+    NSString * country = artist[@"country"][@"text"];
+    id alias = artist[@"alias-list"][@"alias"];
+    alias = ([alias isKindOfClass:[NSArray class]] ? alias[0] : alias)[@"text"];
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,name,nil];
+    if (disambiguation) cell.detailTextLabel.text = disambiguation;
+    else if (alias)     cell.detailTextLabel.text = alias;
+    else                cell.detailTextLabel.text = @"";
+    if (country)
+        cell.detailTextLabel.text = [cell.detailTextLabel.text stringByAppendingFormat:@" (%@)",country,nil];
+    
+    /*
     cell.imageView.image = nil;
-    cell.imageView.bounds = CGRectMake(0, 0, 30, 30);
     
     NSString * image_url = artist[@"image"][0][@"#text"];
     if (image_url.length == 0)
@@ -136,6 +145,7 @@
             NSLog(@"Set image for %@", indexPath);
         });
     });
+     */
     
     return cell;
 }
@@ -145,7 +155,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    
+	[self.searchBar becomeFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning

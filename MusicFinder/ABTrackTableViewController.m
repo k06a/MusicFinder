@@ -15,20 +15,17 @@
 
 @implementation ABTrackTableViewController
 
-- (NSArray *)tracks
-{
-    return self.album[@"tracks"][@"track"];
-}
-
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    return;
+    /*
     if ([segue.identifier isEqualToString:@"segue_track2listen"])
     {
         ABListenTrackViewController * controller = segue.destinationViewController;
         NSDictionary * track = self.tracks[[self.tableView indexPathForCell:sender].row];
         controller.title = track[@"name"];
         controller.url = track[@"url"];
-    }
+    }*/
 }
 
 #pragma mark - UITableView
@@ -46,8 +43,8 @@
         cell = [[UITableViewCell alloc] initWithStyle:(UITableViewCellStyleSubtitle) reuseIdentifier:cell_id];
     
     NSDictionary * track = self.tracks[indexPath.row];
-    int duration = [track[@"duration"] intValue];
-    cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,track[@"name"],nil];
+    int duration = [track[@"length"][@"text"] intValue] / 1000;
+    cell.textLabel.text = [NSString stringWithFormat:@"%d. %@",indexPath.row+1,track[@"recording"][@"title"][@"text"],nil];
     if (duration < 60*60)
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%d:%02d",duration/60,duration%60,nil];
     else
@@ -62,7 +59,7 @@
 {
     [super viewDidLoad];
 	
-    self.title = self.album[@"name"];
+    self.title = self.album[@"title"][@"text"];
 }
 
 - (void)didReceiveMemoryWarning

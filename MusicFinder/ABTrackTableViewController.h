@@ -11,5 +11,6 @@
 @interface ABTrackTableViewController : UITableViewController
 
 @property (nonatomic) NSDictionary * album;
+@property (nonatomic) NSArray * tracks;
 
 @end
